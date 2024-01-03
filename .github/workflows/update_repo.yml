@@ -59,6 +59,7 @@ jobs:
 
           Device : Realme-X [RMX1901] 
           Kernel Version : 4.9.337
+          KernelSU Version: ${{ steps.version.outputs.VER }}
           Kernel Name : BloodMoon-KernelSU
 
     - name: Install dependencies
@@ -99,9 +100,7 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: |
-          Updated KernelSU to ${{ steps.version.outputs.VER }}
-          Get latest kernelsu manager at https://github.com/tiann/KernelSU/releases
+        
         document: RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}.zip
     - name: Upload Kernel
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA }}"
