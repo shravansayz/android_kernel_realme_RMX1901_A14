@@ -30,7 +30,7 @@ jobs:
     - name: Update Repo
       id: sha
       run: |
-        git config --global user.name "shravanayz"
+        git config --global user.name "shravanasayz"
         git config --global user.email "shravankumarsayz@gmail.com"
         git submodule sync
         git submodule update --init --recursive
