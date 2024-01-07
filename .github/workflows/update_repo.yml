@@ -39,25 +39,27 @@ jobs:
         git checkout main
         git pull
         cd .. && git add .
-        git commit -m "Auto sync KernelSU to latest source"
+        git commit -m "KernelSU: Auto-Sync KernelSU To Latest Source"
         export NEW=$(git rev-parse HEAD)
         echo "NEW_SHA=$NEW" >> $GITHUB_OUTPUT
     - name: Push
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA && env.ACCESS_TOKEN != ''}}"
       uses: ad-m/github-push-action@master
-
-jobs:
-  build:
       with:
         github_token: ${{ secrets.ACCESS_TOKEN }}
-
+        
     - name: Send build message to Telegram
       if: "${{ env.TELEGRAM_TO != '' && env.TELEGRAM_TOKEN != '' && github.sha != steps.sha.outputs.NEW_SHA }}"
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-       message: **BloodMoon KernelSU Build Started**
+        message: |
+          **BloodMoon KernelSU Build Started**
+
+          Device : Realme-X [RMX1901] 
+          Kernel Version : 4.9.337
+          Kernel Name : BloodMoon-KernelSU
 
     - name: Install dependencies
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA }}"
@@ -90,6 +92,7 @@ jobs:
        make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
        cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
        cd AnyKernel3 && zip -r ../RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}.zip *
+
     - name: Upload build to Telegram
       if: "${{ env.TELEGRAM_TO != '' && env.TELEGRAM_TOKEN != '' && github.sha != steps.sha.outputs.NEW_SHA}}"
       uses: appleboy/telegram-action@master
@@ -98,7 +101,7 @@ jobs:
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: |
           Updated KernelSU to ${{ steps.version.outputs.VER }}
-          Get latest manager app at https://t.me/KernelSU_group/3234
+          Get latest kernelsu manager at https://github.com/tiann/KernelSU/releases
         document: RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}.zip
     - name: Upload Kernel
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA }}"
