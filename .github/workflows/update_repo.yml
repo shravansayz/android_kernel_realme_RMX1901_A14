@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '30 6 * * 6'
-
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       TELEGRAM_TO: "${{ secrets.TELEGRAM_TO }}"
       TELEGRAM_TOKEN: "${{ secrets.TELEGRAM_TOKEN }}"
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
@@ -30,7 +30,7 @@ jobs:
     - name: Update Repo
       id: sha
       run: |
-        git config --global user.name "shravanasayz"
+        git config --global user.name "shravansayz"
         git config --global user.email "shravankumarsayz@gmail.com"
         git submodule sync
         git submodule update --init --recursive
@@ -38,28 +38,29 @@ jobs:
         git checkout main
         git pull
         cd .. && git add .
-        git commit -m "KernelSU: Auto-Sync KernelSU To Latest Source"
+        git commit -m "Auto sync KernelSU to latest source"
         export NEW=$(git rev-parse HEAD)
         echo "NEW_SHA=$NEW" >> $GITHUB_OUTPUT
     - name: Push
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA && env.ACCESS_TOKEN != ''}}"
       uses: ad-m/github-push-action@master
+name: Push lastest KernelSU
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 6 * * 6'
+jobs:
+  build:
       with:
         github_token: ${{ secrets.ACCESS_TOKEN }}
-        
+
     - name: Send build message to Telegram
       if: "${{ env.TELEGRAM_TO != '' && env.TELEGRAM_TOKEN != '' && github.sha != steps.sha.outputs.NEW_SHA }}"
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: |
-          **BloodMoon KernelSU Build Started**
-
-          Device : Realme-X [RMX1901] 
-          Kernel Version : 4.9.337
-          KernelSU Version: ${{ steps.version.outputs.VER }}
-          Kernel Name : BloodMoon-KernelSU
+       message: **BloodMoon KernelSU Build Started**
 
     - name: Install dependencies
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA }}"
@@ -92,14 +93,15 @@ jobs:
        make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
        cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
        cd AnyKernel3 && zip -r ../RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}.zip *
-
     - name: Upload build to Telegram
       if: "${{ env.TELEGRAM_TO != '' && env.TELEGRAM_TOKEN != '' && github.sha != steps.sha.outputs.NEW_SHA}}"
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        
+        message: |
+          Updated KernelSU to ${{ steps.version.outputs.VER }}
+          Get latest manager app at https://t.me/KernelSU_group/3234
         document: RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}.zip
     - name: Upload Kernel
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA }}"
@@ -107,6 +109,3 @@ jobs:
       with:
         name: RMX1901-BloodMoon-KernelSU-${{ steps.version.outputs.VER }}-${{ steps.get_time.outputs.TIME }}
         path: "AnyKernel3/*"
-        
-
-        
