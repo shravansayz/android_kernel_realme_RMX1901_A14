@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '30 6 * * 6'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,11 +45,13 @@ jobs:
     - name: Push
       if: "${{ github.sha != steps.sha.outputs.NEW_SHA && env.ACCESS_TOKEN != ''}}"
       uses: ad-m/github-push-action@master
+
 name: Push lastest KernelSU
 on:
   workflow_dispatch:
   schedule:
     - cron: '30 6 * * 6'
+
 jobs:
   build:
       with:
